@@ -16,7 +16,9 @@ The Python script in this repository loads the dataset, explores its structure, 
 2. Clone or download this repository to your local machine.
 3. Ensure you have Python installed on your machine.
 4. Install the required Python libraries:
-pip install pandas numpy matplotlib seaborn
+    ```bash
+    pip install pandas numpy matplotlib seaborn
+    ```
 5. Run the Python script:
     ```bash
     python analyze_happiness_report.py
