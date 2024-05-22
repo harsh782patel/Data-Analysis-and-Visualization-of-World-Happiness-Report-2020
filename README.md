@@ -18,8 +18,9 @@ The Python script in this repository loads the dataset, explores its structure, 
 4. Install the required Python libraries:
 pip install pandas numpy matplotlib seaborn
 5. Run the Python script:
-python analyze_happiness_report.py
-
+    ```bash
+    python analyze_happiness_report.py
+    ```
 ## Results
 
 The analysis provides insights into the factors that contribute to happiness levels across different countries. Through visualizations and correlation analysis, patterns and relationships within the dataset are revealed.
