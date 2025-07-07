@@ -1,5 +1,7 @@
-# Data-Analysis-and-Visualization-of-World-Happiness-Report-2020
+# Happiness Insights 2020
 ![World Happiness Report](assets/id8lGFstdW_1751913596371.svg)
+
+[![kaggle](https://img.shields.io/badge/Dataset%20WHR%202020-pink?logo=kaggle&logoColor=%23ffffff&logoSize=auto&labelColor=%2329bdfb&color=%2329bdfb&link=https%3A%2F%2Fwww.kaggle.com%2Fdatasets%2Flondeen%2Fworld-happiness-report-2020)](https://www.kaggle.com/datasets/londeen/world-happiness-report-2020)
 
 ## Overview
 This project analyzes the World Happiness Report 2020 dataset, focusing on happiness metrics during the first year of the COVID-19 pandemic. The analysis explores how different factors like GDP, social support, health expectancy, freedom, generosity, and corruption perception contributed to national happiness levels during this challenging period.
@@ -21,23 +23,21 @@ The project demonstrates a complete data science workflow including:
 - **Happiness Predictor:** Interactive tool to predict national happiness based on input parameters
 - **Policy Recommendations:** Data-driven policy suggestions based on analysis
 
-[here](https://www.kaggle.com/datasets/londeen/world-happiness-report-2020).
-
-## Technologies Used
-
-- Python 3.9+
-- Streamlit (web framework)
-- Pandas (data manipulation)
-- NumPy (numerical computing)
-- Scikit-learn (machine learning)
-- SHAP (model interpretation)
-- Plotly (interactive visualizations)
-- Seaborn (statistical visualizations)
-- Pycountry (country code conversion)
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)](#)
+[![Pandas](https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=fff)](#)
+[![NumPy](https://img.shields.io/badge/NumPy-4DABCF?logo=numpy&logoColor=fff)](#)
+[![Scikit-learn](https://img.shields.io/badge/-scikit--learn-%23F7931E?logo=scikit-learn&logoColor=white)](#)
+[![SHAP](https://img.shields.io/badge/SHAP-pink?logo=shap&label=v0.48.0&labelColor=%23ae13a6&color=%23ae13a6)](#)
+[![Plotly](https://img.shields.io/badge/Plotly-red?logo=plotly&labelColor=%23ce2e62&color=%23ce2e62)](#)
+[![Matplotlib](https://custom-icon-badges.demolab.com/badge/Matplotlib-71D291?logo=matplotlib&logoColor=fff)](#)
+[![Seaborn](https://img.shields.io/badge/Seaborn-Blue?logo=%237db0bc&label=v0.13.2&labelColor=%237db0bc&color=%237db0bc)](#)
+[![Pycountry](https://img.shields.io/badge/PyCountry-pink?logo=shap&label=v24.6.1&labelColor=%23008bfb&color=%23008bfb)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Live Demo
 
-The application is deployed on Streamlit Community Cloud: 
+The application is deployed on Streamlit Community Cloud: [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://harsh782patel-data-analysis-and-visualization-of--appapp-kmou9w.streamlit.app)
 
 ## Installation
 
