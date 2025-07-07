@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+import plotly.graph_objects as go
 import pycountry
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Load data
+# Load data with caching
 @st.cache_data
 def load_data():
     df = pd.read_csv(r'C:\Users\hp070\Data-Analysis-and-Visualization-of-World-Happiness-Report-2020\data\WHR20_DataForFigure2.1.csv')
@@ -34,7 +34,7 @@ def load_data():
                 "Congo (Brazzaville)": "COG",
                 "Congo (Kinshasa)": "COD",
                 "Palestinian Territories": "PSE",
-                "North Cyprus": "CYP"  # Northern Cyprus
+                "North Cyprus": "CYP"
             }
             
             if country_name in special_cases:
@@ -51,6 +51,25 @@ def load_data():
     return df
 
 df = load_data()
+
+# Prepare data for model
+features = ['Logged_GDP_per_capita', 'Social_support', 'Healthy_life_expectancy',
+            'Freedom_to_make_life_choices', 'Generosity', 'Perceptions_of_corruption']
+X = df[features]
+y = df['Ladder_score']
+
+# Cache model and explainer
+@st.cache_resource
+def train_model():
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+    model = RandomForestRegressor(n_estimators=500, random_state=42)
+    model.fit(X_train, y_train)
+    explainer = shap.TreeExplainer(model)
+    return model, explainer
+
+model, explainer = train_model()
 
 # Sidebar
 st.sidebar.title("World Happiness Report 2020")
@@ -69,7 +88,7 @@ life expectancy, freedom, generosity, and corruption perception.
 
 st.sidebar.divider()
 st.sidebar.markdown("### Project by: Harsh Patel")
-st.sidebar.markdown("[LinkedIn](https://www.linkedin.com/in/harsh782patel/)")
+st.sidebar.markdown("[LinkedIn](https://in.linkedin.com/in/harsh782patel)")
 
 # Main content
 st.title("🌍 World Happiness Report 2020 Analysis")
@@ -106,9 +125,17 @@ with tab1:
                 'Healthy_life_expectancy', 'Freedom_to_make_life_choices', 
                 'Generosity', 'Perceptions_of_corruption']
     
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(df[corr_cols].corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
-    st.pyplot(fig)
+    # Use Plotly for correlation matrix
+    corr_matrix = df[corr_cols].corr().round(2)
+    fig = px.imshow(
+        corr_matrix,
+        text_auto=True,
+        color_continuous_scale='RdBu',
+        zmin=-1,
+        zmax=1,
+        title="Correlation Matrix"
+    )
+    st.plotly_chart(fig, use_container_width=True)
     
     st.caption("Note: GDP per capita and Social Support show the strongest correlation with happiness scores")
 
@@ -185,24 +212,21 @@ with tab2:
                 st.markdown(f"**Why it matters:** {metric['importance']}")
                 st.markdown(f"**Typical range:** {metric['range']}")
                 
-                # Add visual representation
+                # Add visual representation using Plotly
                 if metric['name'] == "Happiness Score (Ladder Score)":
-                    fig, ax = plt.subplots(figsize=(8, 2))
-                    sns.kdeplot(df['Ladder_score'], fill=True, color="skyblue", ax=ax)
-                    ax.set_title("Global Happiness Distribution")
-                    ax.set_xlabel("Happiness Score (0-10)")
-                    ax.set_yticks([])
-                    st.pyplot(fig)
+                    fig = px.histogram(df, x='Ladder_score', nbins=30, 
+                                      title="Global Happiness Distribution",
+                                      labels={'Ladder_score': 'Happiness Score (0-10)'})
+                    st.plotly_chart(fig, use_container_width=True)
                 else:
                     col_name = metric['name'].split(" ")[0] + "_score" if metric['name'] == "Happiness Score (Ladder Score)" else metric['name'].split(" ")[0]
                     col_name = [c for c in df.columns if col_name.lower() in c.lower()][0]
                     
-                    fig, ax = plt.subplots(figsize=(8, 3))
-                    sns.scatterplot(x=df[col_name], y=df['Ladder_score'], alpha=0.6, ax=ax)
-                    ax.set_title(f"Relationship with Happiness")
-                    ax.set_xlabel(metric['name'])
-                    ax.set_ylabel("Happiness Score")
-                    st.pyplot(fig)
+                    fig = px.scatter(df, x=col_name, y='Ladder_score', 
+                                    trendline='ols',
+                                    title=f"{metric['name']} vs Happiness",
+                                    labels={col_name: metric['name'], 'Ladder_score': 'Happiness Score'})
+                    st.plotly_chart(fig, use_container_width=True)
     
     st.divider()
     st.subheader("How These Metrics Work Together")
@@ -228,23 +252,23 @@ with tab3:
     st.header("Regional Analysis")
     
     # Regional happiness comparison
-    regional_avg = df.groupby('Regional_indicator')['Ladder_score'].mean().sort_values(ascending=False)
+    regional_avg = df.groupby('Regional_indicator')['Ladder_score'].mean().sort_values(ascending=False).reset_index()
     
     col1, col2 = st.columns([1, 2])
     with col1:
         st.subheader("Regional Happiness Ranking")
-        st.dataframe(regional_avg.reset_index().rename(
+        st.dataframe(regional_avg.rename(
             columns={"Regional_indicator": "Region", "Ladder_score": "Avg. Happiness Score"}), 
             hide_index=True)
         
     with col2:
         fig = px.bar(regional_avg, 
-                     x=regional_avg.values, 
-                     y=regional_avg.index,
+                     x='Ladder_score', 
+                     y='Regional_indicator',
                      orientation='h',
                      title="Average Happiness by Region",
-                     labels={'x': 'Happiness Score', 'y': ''},
-                     color=regional_avg.values,
+                     labels={'Ladder_score': 'Happiness Score', 'Regional_indicator': ''},
+                     color='Ladder_score',
                      color_continuous_scale='viridis')
         st.plotly_chart(fig, use_container_width=True)
     
@@ -285,34 +309,23 @@ with tab4:
     # Feature importance visualization
     st.subheader("Relative Importance of Happiness Factors")
     
-    # Prepare data for model
-    features = ['Logged_GDP_per_capita', 'Social_support', 'Healthy_life_expectancy',
-                'Freedom_to_make_life_choices', 'Generosity', 'Perceptions_of_corruption']
-    X = df[features]
-    y = df['Ladder_score']
-    
-    # Train model
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-    model = RandomForestRegressor(n_estimators=500, random_state=42)
-    model.fit(X_train, y_train)
-    
     # Feature importance
     importance = model.feature_importances_
     feature_importance = pd.DataFrame({
         'Feature': features,
         'Importance': importance
-    }).sort_values('Importance', ascending=False)
+    }).sort_values('Importance', ascending=True)  # Sort for better visualization
     
-    # Fix the warning: Assign y to hue and set legend=False
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(x='Importance', y='Feature', data=feature_importance, 
-                palette='viridis', hue='Feature', legend=False, ax=ax)
-    ax.set_title('Feature Importance in Happiness Prediction')
-    ax.set_xlabel('Relative Importance')
-    ax.set_ylabel('')
-    st.pyplot(fig)
+    # Use Plotly for feature importance
+    fig = px.bar(feature_importance, 
+                 x='Importance', 
+                 y='Feature', 
+                 orientation='h',
+                 title='Feature Importance in Happiness Prediction',
+                 labels={'Importance': 'Relative Importance', 'Feature': ''},
+                 color='Importance',
+                 color_continuous_scale='viridis')
+    st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("""
     **COVID-Specific Findings:**
@@ -321,17 +334,28 @@ with tab4:
     - Generosity had unexpected negative correlation in 40% of regions
     """)
     
-    # SHAP values
+    # SHAP values - using Plotly
     st.subheader("How Each Factor Impacts Happiness")
     st.markdown("SHAP (SHapley Additive exPlanations) values show how each feature impacts predictions:")
     
     # Calculate SHAP values
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_test)
+    shap_values = explainer.shap_values(X)
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    shap.summary_plot(shap_values, X_test, feature_names=features, plot_type="bar", show=False)
-    st.pyplot(fig)
+    # Create SHAP summary plot using Plotly
+    mean_abs_shap = pd.DataFrame({
+        'Feature': features,
+        'SHAP Value': np.abs(shap_values).mean(0)
+    }).sort_values('SHAP Value', ascending=True)
+    
+    fig = px.bar(mean_abs_shap, 
+                 x='SHAP Value', 
+                 y='Feature', 
+                 orientation='h',
+                 title='Average Impact on Happiness Prediction',
+                 labels={'SHAP Value': 'Average |SHAP Value|', 'Feature': ''},
+                 color='SHAP Value',
+                 color_continuous_scale='viridis')
+    st.plotly_chart(fig, use_container_width=True)
     
     # Policy recommendations
     st.subheader("Policy Recommendations")
@@ -427,7 +451,7 @@ with tab5:
             st.metric("Predicted Happiness Score", f"{prediction:.2f}/10")
             
             # Interpretation
-            st.progress(prediction/10)
+            st.progress(min(1.0, prediction/10))
             
             if prediction > 7.0:
                 st.success("🇫🇮 Finland-level Happiness (Top Tier)")
@@ -438,39 +462,41 @@ with tab5:
             else:
                 st.warning("⚠️ Below Global Average Happiness")
             
-            # SHAP explanation
+            # SHAP explanation - using Plotly
             st.subheader("How Each Factor Impacts This Prediction")
             
             # Calculate SHAP values for this prediction
-            shap_values_single = explainer.shap_values(input_data)
+            shap_values_single = explainer(input_data)
             
-            fig, ax = plt.subplots(figsize=(10, 6))
-            shap.decision_plot(
-                explainer.expected_value, 
-                shap_values_single[0], 
-                features, 
-                feature_display_range=slice(None, None, -1),
-                show=False
-            )
-            plt.tight_layout()
-            st.pyplot(fig)
-            
-            # Factor contribution breakdown
-            st.subheader("Factor Contribution Breakdown")
+            # Create Plotly bar chart for contributions
             contrib_data = {
                 'Factor': features,
-                'Contribution': shap_values_single[0][0]
+                'Contribution': shap_values_single[0].values
             }
-            contrib_df = pd.DataFrame(contrib_data).sort_values('Contribution', ascending=False)
+            contrib_df = pd.DataFrame(contrib_data).sort_values('Contribution', ascending=True)
             
             fig = px.bar(contrib_df, 
                          x='Contribution', 
                          y='Factor', 
                          orientation='h',
+                         title='Factor Contribution to Happiness Score',
+                         labels={'Contribution': 'Contribution to Prediction', 'Factor': ''},
                          color='Contribution',
-                         color_continuous_scale='RdYlGn',
-                         title='Factor Contribution to Happiness Score')
+                         color_continuous_scale='RdYlGn')
+            fig.add_vline(x=0, line_dash="dash", line_color="black")
             st.plotly_chart(fig, use_container_width=True)
+            
+            # Interpretation text
+            st.subheader("Interpretation")
+            main_positive = contrib_df.nlargest(1, 'Contribution').iloc[0]
+            main_negative = contrib_df.nsmallest(1, 'Contribution').iloc[0]
+            
+            st.markdown(f"""
+            - **{main_positive['Factor']}** has the largest positive impact (+{main_positive['Contribution']:.2f})
+            - **{main_negative['Factor']}** has the largest negative impact ({main_negative['Contribution']:.2f})
+            
+            *Note: Contributions show how much each factor added to or subtracted from the base happiness score.*
+            """)
         else:
             st.subheader("How to Use This Tool")
             st.markdown("""
