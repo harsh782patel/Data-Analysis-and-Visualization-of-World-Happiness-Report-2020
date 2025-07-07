@@ -20,7 +20,7 @@ st.set_page_config(
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_csv('WHR20_DataForFigure2.1.csv')
+    df = pd.read_csv(r'C:\Users\hp070\Data-Analysis-and-Visualization-of-World-Happiness-Report-2020\data\WHR20_DataForFigure2.1.csv')
     # Clean column names
     df.columns = [col.strip().replace(' ', '_').replace(':', '').replace('.', '') for col in df.columns]
     
