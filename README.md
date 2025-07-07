@@ -37,7 +37,7 @@ The project demonstrates a complete data science workflow including:
 
 ## Live Demo
 
-The application is deployed on Streamlit Community Cloud: [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://harsh782patel-data-analysis-and-visualization-of--appapp-kmou9w.streamlit.app)
+The application is deployed on Streamlit Community Cloud: [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://harsh782patel-happinessinsights2020.streamlit.app/)
 
 ## Installation
 
